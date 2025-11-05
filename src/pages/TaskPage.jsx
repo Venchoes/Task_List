@@ -12,7 +12,8 @@ function TaskPage()
 
     <div className="w-[500px] space-y-7">
         <div className="flex justify-center relative mb-6">
-          <button onClick={() => navigate(-1)} className="absolute left-0 top-0 bottom-0">
+          {/* use navigate('/') instead of navigate(-1) to avoid synthetic clicks hitting elements on the previous page */}
+          <button onClick={() => navigate('/')} className="absolute left-0 top-0 bottom-0 px-2 py-2">
             <Undo2 />
           </button> 
         <h1 className="text-3xl text-black font-bold text-center">

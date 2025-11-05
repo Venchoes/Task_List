@@ -19,16 +19,17 @@ function Tasks({ onEraserClick, onTaskClick, tasks })
     return (
         <ul className="space-y-4 p-6 bg-white rounded-md shadow">
             {tasks.map((task) => (
-                <li key={task.id} className="flex gap-2">
+                <li key={task.id} className="flex gap-2 items-center">
                     {/* ao clicar na tarefa, chama a função onTaskClick passada como props */}
-                    <button onClick={() => onTaskClick(task.id)} className={`bg-blue-300 text-left w-full text-black p-2 rounded-md ${task.isCompleted && 'line-through'}`}>
+                    {/* use flex-1 em vez de w-full para evitar que o botão ocupe/ sobreponha outros botões */}
+                    <button type="button" onClick={() => onTaskClick(task.id)} className={`flex-1 bg-blue-300 text-left text-black p-2 rounded-md ${task.isCompleted && 'line-through'}`}>
                         {task.title}
                     </button>
                     {/* botão para editar a tarefa */}
-                    <button onClick={() => onSeeDetailsClick(task)} className="bg-yellow-200 p-2 rounded-md text-black">
+                    <button type="button" onClick={() => onSeeDetailsClick(task)} className="bg-yellow-200 p-2 rounded-md text-black">
                         <ChevronRightIcon className="h-6 w-6" />
                     </button>
-                    <button onClick={() => onEraserClick(task.id)} className="bg-red-300 p-2 rounded-md text-black">
+                    <button type="button" onClick={() => onEraserClick(task.id)} className="bg-red-300 p-2 rounded-md text-black">
                         <EraserIcon />
                     </button>
                 </li>
