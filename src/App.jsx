@@ -7,35 +7,13 @@ import { useNavigate } from 'react-router-dom';
 
 function App()
 {
-  // tarefas iniciais padrão
-  const initialTasks = [
-    {
-      id: v4(),
-      title: 'Estudar React',
-      description: 'Ler a documentação oficial do React e fazer alguns tutoriais.',
-      isCompleted: false,
-    },
-    {
-      id: v4(),
-      title: 'Ler um livro',
-      description: 'Ler um livro de ficção científica.',
-      isCompleted: false,
-    },
-    {
-      id: v4(),
-      title: 'Ir para a academia',
-      description: 'Fazer exercícios de musculação e cardio.',
-      isCompleted: false,
-    }
-  ];
-
   // carregar do localStorage, se houver, para manter tarefas do usuário entre rotas
   const [tasks, setTasks] = useState(() => {
     try {
       const raw = localStorage.getItem('tasks');
-      return raw ? JSON.parse(raw) : initialTasks;
+      return raw ? JSON.parse(raw) : [];
     } catch {
-      return initialTasks;
+      return [];
     }
   });
 

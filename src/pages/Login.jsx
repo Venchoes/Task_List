@@ -30,10 +30,10 @@ export default function Login() {
         <h1 className="text-3xl text-black font-bold text-center">Login</h1>
         <form onSubmit={onSubmit} className="space-y-4 p-6 bg-white rounded-md shadow">
           <input type="email" required placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full px-3 py-2 border rounded" />
-          <input type="password" required placeholder="Senha" value={password} onChange={e=>setPassword(e.target.value)} className="w-full px-3 py-2 border rounded" />
+          <input type="password" required placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full px-3 py-2 border rounded" />
           <div className="flex gap-2">
-            <button type="submit" className="bg-blue-300 text-black px-4 py-2 rounded flex-1" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
-            <button type="button" onClick={() => navigate('/register')} className="bg-yellow-200 px-4 py-2 rounded">Cadastro</button>
+            <button type="submit" className="bg-blue-300 text-black px-4 py-2 rounded flex-1" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+            <button type="button" onClick={() => navigate('/register')} className="bg-yellow-200 px-4 py-2 rounded">Sign Up</button>
           </div>
         </form>
       </div>
