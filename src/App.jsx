@@ -92,7 +92,7 @@ function App()
         status: 'pending',
         priority: 'normal',
         dueDate: null,
-        user: null,
+        user: getAuth().user?.id || null,
       };
       setTasks(prev => [...prev, newTask]);
     }
