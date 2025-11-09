@@ -21,7 +21,10 @@ export default function Register() {
       add('Cadastro realizado com sucesso. Faça login.', 'success');
       navigate('/login');
     } catch (err) {
-      add(err?.message || 'Falha no cadastro', 'error');
+      // Mostrar erro detalhado retornado pelo servidor quando disponível
+      console.error('Register error', err);
+      const serverMsg = err?.data?.message || err?.data || err?.message;
+      add(serverMsg || 'Falha no cadastro', 'error');
     } finally { setLoading(false); }
   }
 

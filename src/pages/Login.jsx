@@ -20,7 +20,9 @@ export default function Login() {
       add('Login successful', 'success');
       navigate('/');
     } catch (err) {
-      add(err?.message || 'Failed to login', 'error');
+      console.error('Login error', err);
+      const serverMsg = err?.data?.message || err?.data || err?.message;
+      add(serverMsg || 'Failed to login', 'error');
     } finally { setLoading(false); }
   }
 
