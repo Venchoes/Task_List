@@ -22,7 +22,7 @@ function Tasks({ onEraserClick, onTaskClick, tasks })
                 <li key={task.id} className="flex gap-2 items-center">
                     {/* ao clicar na tarefa, chama a função onTaskClick passada como props */}
                     {/* use flex-1 em vez de w-full para evitar que o botão ocupe/ sobreponha outros botões */}
-                    <button type="button" onClick={() => onTaskClick(task.id)} className={`flex-1 bg-blue-300 text-left text-black p-2 rounded-md ${task.isCompleted && 'line-through'}`}>
+                    <button type="button" onClick={() => onTaskClick(task.id)} className={`flex-1 bg-blue-300 text-left text-black p-2 rounded-md ${task.status === 'done' && 'line-through'}`}>
                         {task.title}
                     </button>
                     {/* botão para editar a tarefa */}
