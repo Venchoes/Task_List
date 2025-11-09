@@ -3,6 +3,7 @@ import Tasks from "./components/Tasks";
 import AddTask from "./components/AddTask";
 import { v4 } from 'uuid';
 import { useAuth } from './contexts/AuthContext.jsx';
+import { useToast } from './contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { get, post } from "./services/api.js";
 
@@ -100,10 +101,14 @@ function App()
 
   //retornando o componente Tasks e passando as tarefas como props
   const { logout } = useAuth();
+  const { add, removeByMessage } = useToast();
   const navigate = useNavigate();
 
   function handleLogout() {
+    // remove session-expired toast (if present) so logout success overrides it
+    try { removeByMessage('Sessão expirada. Faça login novamente.'); } catch {}
     logout();
+    add('Logout realizado', 'success');
     navigate('/login');
   }
 

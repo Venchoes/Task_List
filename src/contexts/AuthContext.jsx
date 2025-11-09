@@ -128,7 +128,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     localStorage.removeItem('token_expiry');
     localStorage.removeItem('user');
-    try { window.dispatchEvent(new Event('tokenExpired')) } catch {}
+    // dispatch a distinct event for manual logout so it doesn't show the 'tokenExpired' toast
+    try { window.dispatchEvent(new Event('userLogout')) } catch {}
   }, []);
 
   return (
