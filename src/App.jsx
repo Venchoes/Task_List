@@ -4,10 +4,11 @@ import AddTask from "./components/AddTask";
 import { v4 } from 'uuid';
 import { useAuth } from './contexts/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import { get, post } from "./services/api.js";
 
 function App()
 {
-  // carregar do localStorage, se houver, para manter tarefas do usuário entre rotas
+  // carregar do backend (API) para manter tarefas do usuário sincronizadas
   const _blacklistInitialTitles = [
     "estudar react",
     "ler um livro",
@@ -15,47 +16,47 @@ function App()
     "ir pra academia",
   ];
 
-  // carregar do localStorage, migrando/normalizando formato antigo para o novo modelo
-  const [tasks, setTasks] = useState(() => {
-    try {
-      const raw = localStorage.getItem('tasks');
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) return [];
+  // tasks carregadas a partir da API
+  const [tasks, setTasks] = useState([]);
 
-      function normalizeTask(t) {
-        const title = (t?.title || "").toString();
-        const description = (t?.description || "").toString();
-        const status = t?.status ?? (t?.isCompleted ? "done" : "pending");
-        return {
-          id: t?.id ?? v4(),
-          title,
-          description,
-          status,
-          priority: t?.priority ?? "normal",
-          dueDate: t?.dueDate ?? null,
-          user: t?.user ?? null,
-        };
+  // normalize helper
+  function normalizeTaskFromServer(t) {
+    return {
+      id: t?.id ?? t?._id ?? v4(),
+      title: (t?.title || "").toString(),
+      description: (t?.description || "").toString(),
+      status: t?.status ?? (t?.isCompleted ? 'done' : 'pending'),
+      priority: t?.priority ?? 'normal',
+      dueDate: t?.dueDate ?? null,
+      user: t?.user ?? null,
+    };
+  }
+
+  // carregar tarefas do backend ao montar
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const data = await get('/tasks');
+        if (!mounted) return;
+        if (Array.isArray(data)) {
+          const normalized = data.map(normalizeTaskFromServer).filter((task) => {
+            const title = (task.title || "").toString().trim().toLowerCase();
+            return !_blacklistInitialTitles.includes(title);
+          });
+          setTasks(normalized);
+        } else {
+          setTasks([]);
+        }
+      } catch (e) {
+        console.error('Failed to load tasks from API', e);
       }
-
-      // migrar e remover possíveis tasks de teste
-      const normalized = parsed.map(normalizeTask).filter((task) => {
-        const title = (task.title || "").toString().trim().toLowerCase();
-        return !_blacklistInitialTitles.includes(title);
-      });
-
-      // Se algo foi removido/migrado, persistir a lista limpa
-      if (normalized.length !== parsed.length) {
-        try { localStorage.setItem('tasks', JSON.stringify(normalized)); } catch (e) { /* ignore */ }
-      }
-
-      return normalized;
-    } catch {
-      return [];
     }
-  });
+    load();
+    return () => { mounted = false };
+  }, []);
 
-  // persistir tarefas no localStorage
+  // persistir tarefas no localStorage (opcional fallback)
   useEffect(() => {
     try { localStorage.setItem('tasks', JSON.stringify(tasks)); } catch (e) { /* ignore */ }
   }, [tasks]);
@@ -73,19 +74,28 @@ function App()
     setTasks(prev => prev.filter(task => task.id !== taskId));
   }
 
-  //função para adicionar uma nova tarefa
-  function onAddTask(title, description)
+  //função para adicionar uma nova tarefa (envia para o backend)
+  async function onAddTask(title, description)
   {
-    const newTask = {
-      id: v4(),
-      title: title,
-      description: description,
-      status: 'pending',
-      priority: 'normal',
-      dueDate: null,
-      user: null,
-    };
-    setTasks(prev => [...prev, newTask]);
+    try {
+      const created = await post('/tasks', { title, description });
+      // assume que o backend retorna a task criada
+      const normalized = normalizeTaskFromServer(created);
+      setTasks(prev => [...prev, normalized]);
+    } catch (e) {
+      console.error('Failed to create task', e);
+      // fallback local
+      const newTask = {
+        id: v4(),
+        title: title,
+        description: description,
+        status: 'pending',
+        priority: 'normal',
+        dueDate: null,
+        user: null,
+      };
+      setTasks(prev => [...prev, newTask]);
+    }
   }
 
   //retornando o componente Tasks e passando as tarefas como props
