@@ -21,7 +21,10 @@ export default function Login() {
       navigate('/');
     } catch (err) {
       console.error('Login error', err);
-      const serverMsg = err?.data?.message || err?.data || err?.message;
+      let serverMsg = err?.data?.message || err?.data || err?.message;
+      if (typeof serverMsg !== 'string') {
+        try { serverMsg = JSON.stringify(serverMsg); } catch { serverMsg = String(serverMsg); }
+      }
       add(serverMsg || 'Failed to login', 'error');
     } finally { setLoading(false); }
   }

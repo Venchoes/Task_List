@@ -23,7 +23,10 @@ export default function Register() {
     } catch (err) {
       // Mostrar erro detalhado retornado pelo servidor quando disponível
       console.error('Register error', err);
-      const serverMsg = err?.data?.message || err?.data || err?.message;
+      let serverMsg = err?.data?.message || err?.data || err?.message;
+      if (typeof serverMsg !== 'string') {
+        try { serverMsg = JSON.stringify(serverMsg); } catch { serverMsg = String(serverMsg); }
+      }
       add(serverMsg || 'Falha no cadastro', 'error');
     } finally { setLoading(false); }
   }
