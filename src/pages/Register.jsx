@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { API_BASE } from '../services/api';
 
 export default function Register() {
   const { register } = useAuth();
@@ -21,13 +22,44 @@ export default function Register() {
       add('Cadastro realizado com sucesso. Faça login.', 'success');
       navigate('/login');
     } catch (err) {
-      // Mostrar erro detalhado retornado pelo servidor quando disponível
       console.error('Register error', err);
-      let serverMsg = err?.data?.message || err?.data || err?.message;
-      if (typeof serverMsg !== 'string') {
-        try { serverMsg = JSON.stringify(serverMsg); } catch { serverMsg = String(serverMsg); }
+
+      // Formatação enriquecida do erro para o toast
+      const status = err?.status;
+      const code = err?.code;
+      const isNetwork = code === 'NETWORK_ERROR';
+      const isCorsLikely = err?.isCorsLikely;
+      const rawServerMessage = err?.data?.message || err?.data || err?.message;
+      let detail = typeof rawServerMessage === 'string' ? rawServerMessage : undefined;
+      if (!detail && rawServerMessage) {
+        try { detail = JSON.stringify(rawServerMessage); } catch {}
       }
-      add(serverMsg || 'Falha no cadastro', 'error');
+
+      let hint = '';
+      if (isNetwork) {
+        if (isCorsLikely) {
+          hint = 'Possível bloqueio de CORS. Verifique se está usando URL relativa ou habilite CORS no backend.';
+        } else {
+          hint = 'Falha de rede. Verifique se o backend está acessível.';
+        }
+      } else if (status === 422) {
+        hint = 'Dados inválidos. Confirme nome, email e senha.';
+      } else if (status === 401) {
+        hint = 'Não autorizado. Faça login novamente.';
+      } else if (status === 409) {
+        hint = 'Usuário já existe.';
+      } else if (status >= 500) {
+        hint = 'Erro interno do servidor. Tente novamente em instantes.';
+      }
+
+      const parts = [
+        'Erro ao cadastrar',
+        status ? `(status ${status})` : (isNetwork ? '(rede)' : ''),
+        detail ? `: ${detail}` : '',
+        hint ? `\n${hint}` : '',
+        API_BASE ? `\nBase API: ${API_BASE || '(relativa)'}` : ''
+      ].filter(Boolean);
+      add(parts.join(' '), 'error', 8000); // timeout maior para ler detalhes
     } finally { setLoading(false); }
   }
 
